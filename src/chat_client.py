@@ -118,10 +118,6 @@ class ChatClient(WebSocket, ClientInterface):
 
     def send_message(self):
         message = self.request.message
-        if message is None:
-            self.sendMessage(Response(type=ErrorType.MESSAGE_IS_NULL, detail='message in request is null',
-                                      event_type=self.request.event_type).to_json())
-            return
         message = message.to_dict()
         message['created_at'] = round(datetime.now().timestamp())
         message['username'] = self.get_username(self.request.token)

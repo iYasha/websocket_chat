@@ -10,7 +10,6 @@ class ErrorType(Enum):
     SUCCESS = 'success'
     SERVER_ERROR = 'server_error'
     EVENT_NOT_FOUND = 'event_not_found'
-    MESSAGE_IS_NULL = 'message_is_null'
     TOKEN_VALIDATION_ERROR = 'token_validation_error'
     CHAT_NOT_EXISTS = 'chat_not_exists'
 
