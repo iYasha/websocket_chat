@@ -1,0 +1,21 @@
+version: '3'
+services:
+  chat_socket:
+    build: .
+    container_name: chat_socket
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/code
+    env_file:
+      - ./.env
+    restart: on-failure
+    networks:
+      slm_network:
+        aliases:
+          - chat_socket.slm_network
+
+networks:
+  slm_network:
+    external:
+      name: slm_network
