@@ -2,7 +2,7 @@
 Файл утилит для чата
 """
 import os
-if os.getenv('DATABASE') == 'posgresql':
+if os.getenv('DATABASE') == 'postgresql':
     import psycopg2
 
 

@@ -165,12 +165,15 @@ class ChatClient(WebSocket, ClientInterface):
                 self.user_id = is_auth_success
             getattr(self, self.request.event_type.value)()
         except AuthorizationError as e:
+            logger.debug(e)
             self.sendMessage(Response(type=ErrorType.TOKEN_VALIDATION_ERROR, detail=str(e)
                                       , event_type=self.request.event_type).to_json())
         except ChatNotExistsError as e:
+            logger.debug(e)
             self.sendMessage(Response(type=ErrorType.CHAT_NOT_EXISTS, detail=str(e)
                                       , event_type=self.request.event_type).to_json())
         except ValueError as e:
+            logger.debug(e)
             self.sendMessage(Response(type=ErrorType.EVENT_NOT_FOUND, detail=str(e)
                                       , event_type=self.request.event_type).to_json())
         except Exception as e:

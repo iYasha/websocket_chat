@@ -19,8 +19,8 @@ cursor = connection.cursor()
 logger.info('БД успешно подключена')
 
 
-@dataclass
 @dataclass_json(undefined=Undefined.EXCLUDE)
+@dataclass
 class User:
     id: str
     email: str
@@ -41,7 +41,7 @@ class Client(ChatClient):
 
     def get_user_profile(self, token) -> Optional[User]:
         if self.user_profile is None:
-            cursor.execute(f'SELECT user_id FROM authtoken_token WHERE key LIKE "{token}"')
+            cursor.execute(f"SELECT user_id FROM authtoken_token WHERE key = '{token}'")
             result = cursor.fetchone()
             if result is None:
                 return None
@@ -69,12 +69,14 @@ class Client(ChatClient):
     def save_message(self, message: Message) -> Optional[str]:
         message = message.to_dict()
         keys = ', '.join(message.keys())
-        values = ', '.join(['"' + str(x) + '"' for x in message.values()])
-        cursor.execute(f'INSERT INTO `slm_chatmessage`({keys}) VALUES ({values})')
+        values = ', '.join(["'" + str(x) + "'" for x in message.values()])
+        cursor.execute(f'INSERT INTO slm_chatmessage({keys}) VALUES ({values})')
         connection.commit()
+        cursor.execute('SELECT LASTVAL()')
+        return cursor.fetchone()['lastval']
 
     def get_messages(self, chat_id: str) -> List[Message]:
-        cursor.execute(f'SELECT * FROM `slm_chatmessage` WHERE chat_id = {chat_id}')
+        cursor.execute(f'SELECT * FROM slm_chatmessage WHERE chat_id = {chat_id}')
         result = cursor.fetchall()
         messages = [Message.from_dict(x) for x in result]
         return messages

@@ -28,8 +28,8 @@ class MessageType(Enum):
     FILE = 'file'
 
 
-@dataclass
 @dataclass_json(undefined=Undefined.EXCLUDE)
+@dataclass
 class Message:
     type: MessageType = field(metadata=config(encoder=lambda x: x.value, decoder=lambda x: MessageType(x)))
     text: Optional[str] = None
