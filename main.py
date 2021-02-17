@@ -112,7 +112,7 @@ class Client(ChatClient):
 
 if __name__ == '__main__':
     logger.info(f'Запуск веб-сокета, Хост: {os.getenv("HOST")}, Порт: {os.getenv("PORT")}')
-    server = SimpleWebSocketServer(os.getenv('HOST'), os.getenv('PORT'), Client)
+    server = SimpleWebSocketServer(os.getenv('HOST', ''), os.getenv('PORT'), Client)
     logger.info('Сокет запустился')
     server.serveforever()
     logger.info('Соединение закрыто')
