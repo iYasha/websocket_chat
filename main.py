@@ -70,19 +70,19 @@ class Client(ChatClient):
         message = message.to_dict()
         keys = ', '.join(message.keys())
         values = ', '.join(["'" + str(x) + "'" for x in message.values()])
-        cursor.execute(f'INSERT INTO slm_chatmessage({keys}) VALUES ({values})')
+        cursor.execute(f'INSERT INTO task_chatmessage({keys}) VALUES ({values})')
         connection.commit()
         cursor.execute('SELECT LASTVAL()')
         return cursor.fetchone()['lastval']
 
     def get_messages(self, chat_id: str) -> List[Message]:
-        cursor.execute(f'SELECT * FROM slm_chatmessage WHERE chat_id = {chat_id}')
+        cursor.execute(f'SELECT * FROM task_chatmessage WHERE chat_id = {chat_id}')
         result = cursor.fetchall()
         messages = [Message.from_dict(x) for x in result]
         return messages
 
     def is_chat_exists(self, chat_id: str) -> bool:
-        cursor.execute(f'SELECT * FROM slm_task WHERE id = {chat_id}')
+        cursor.execute(f'SELECT * FROM task_task WHERE id = {chat_id}')
         task = cursor.fetchone()
         if task is None:
             return False
