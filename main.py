@@ -90,8 +90,11 @@ class Client(ChatClient):
 
     def get_messages(self, chat_id: str) -> List[Message]:
         cursor.execute(f'SELECT * FROM task_chatmessage WHERE chat_id = {chat_id}')
+        user_keys = [desc[0] for desc in cursor.description]
         result = cursor.fetchall()
-        messages = [Message.from_dict(x) for x in result]
+        if result is None:
+            return None
+        messages = [Message.from_dict({x: res[idx] for idx, x in enumerate(user_keys)}) for res in result]
         return messages
 
     def is_chat_exists(self, chat_id: str) -> bool:
