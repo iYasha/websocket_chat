@@ -139,15 +139,19 @@ class ChatClient(WebSocket, ClientInterface):
                                        self.get_active_users(self.request.chat_id))
 
     def get_history(self):
+        print('1')
         messages = [x.to_dict() for x in self.get_messages(self.request.chat_id)]
+        print('2')
         for message in messages:
             message['is_my'] = False
             if message['user_id'] is not None and message['user_id'] == self.user_id:
                 message['is_my'] = True
+        print('3')
         messages = sorted(messages, key=lambda x: x['created_at'])
         self.sendMessage(Response(type=ErrorType.SUCCESS, detail='',
                                   event_type=self.request.event_type,
                                   messages=messages).to_json())
+        print('4')
 
     def send_file(self):
         self.send_message()
@@ -159,7 +163,9 @@ class ChatClient(WebSocket, ClientInterface):
             if not self.is_chat_exists(self.request.chat_id):
                 raise ChatNotExistsError('Chat not exists or user dont have permissions to write/read this chat')
             if self.user_id is None:
+                print('1')
                 is_auth_success = self.is_authenticated(self.request.token)
+                print('2')
                 if is_auth_success is None:
                     raise AuthorizationError('Token validation error')
                 self.user_id = is_auth_success

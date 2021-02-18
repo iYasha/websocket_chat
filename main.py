@@ -40,18 +40,27 @@ class Client(ChatClient):
         self.user_profile = None
 
     def get_user_profile(self, token) -> Optional[User]:
-        if self.user_profile is None:
-            cursor.execute(f"SELECT user_id FROM authtoken_token WHERE key = '{token}'")
-            result = cursor.fetchone()
-            if result is None:
-                return None
-            user_id = result['user_id']
-            cursor.execute(f'SELECT * from slm_user WHERE id = {user_id}')
-            result = cursor.fetchone()
-            if result is None:
-                return None
-            self.user_profile = User.from_dict(result)
-        return self.user_profile
+        global connection, cursor
+        try:
+            logger.debug('Начала работать функция get_user_profile')
+            if self.user_profile is None:
+                cursor.execute(f"SELECT user_id FROM authtoken_token WHERE key = '{token}'")
+                result = cursor.fetchone()
+                if result is None:
+                    return None
+                user_id = result[0]
+                cursor.execute(f'SELECT * from slm_user WHERE id = {user_id}')
+                user_keys = [desc[0] for desc in cursor.description]
+                result = cursor.fetchone()
+                if result is None:
+                    return None
+                self.user_profile = User.from_dict({x: result[idx] for idx, x in enumerate(user_keys)})
+            logger.debug('Закончила работать функция get_user_profile')
+            return self.user_profile
+        except Exception as e:
+            logger.error(e)
+            connection = get_connection()
+            cursor = connection.cursor()
 
     def get_avatar(self, token: str) -> str:
         return self.get_user_profile(token).avatar
@@ -61,7 +70,9 @@ class Client(ChatClient):
         return user.first_name + ' ' + user.last_name
 
     def is_authenticated(self, token: str) -> Optional[str]:
+        logger.debug('Начала работать функция is_authenticated')
         user = self.get_user_profile(token)
+        logger.debug('Закончила работать функция is_authenticated')
         if user is not None:
             return user.id
         return None
