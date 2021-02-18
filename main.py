@@ -78,13 +78,15 @@ class Client(ChatClient):
         return None
 
     def save_message(self, message: Message) -> Optional[str]:
-        message = message.to_dict()
+        global connection, cursor
+        if 'id' in message:
+            message.pop('id')
         keys = ', '.join(message.keys())
         values = ', '.join(["'" + str(x) + "'" for x in message.values()])
         cursor.execute(f'INSERT INTO task_chatmessage({keys}) VALUES ({values})')
         connection.commit()
         cursor.execute('SELECT LASTVAL()')
-        return cursor.fetchone()['lastval']
+        return cursor.fetchone()[0]
 
     def get_messages(self, chat_id: str) -> List[Message]:
         cursor.execute(f'SELECT * FROM task_chatmessage WHERE chat_id = {chat_id}')

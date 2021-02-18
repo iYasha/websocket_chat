@@ -119,39 +119,39 @@ class ChatClient(WebSocket, ClientInterface):
     def send_message(self):
         message = self.request.message
         message = message.to_dict()
-        message['created_at'] = round(datetime.now().timestamp())
+        message['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         message['username'] = self.get_username(self.request.token)
         message['avatar'] = self.get_avatar(self.request.token)
         message['chat_id'] = self.request.chat_id
         message['user_id'] = self.user_id
-        message['id'] = self.save_message(self.request.message)
+        message['id'] = self.save_message(message)
+        print('test')
         for client in iter(filter(
                 lambda x: x.request is not None and x.request.chat_id == self.request.chat_id, self.get_clients
         )):
+            print('test1')
             message['is_my'] = False
             if client.user_id is not None and client.user_id == self.user_id:
                 message['is_my'] = True
+            print('test2')
             client.sendMessage(Response(type=ErrorType.SUCCESS, detail='Success',
                                         event_type=self.request.event_type,
                                         messages=[message]).to_json())
+            print('test3')
             if os.getenv('USE_NOTIFICATION'):
                 self.send_notification(self.request.chat_id, Message.from_dict(message),
                                        self.get_active_users(self.request.chat_id))
 
     def get_history(self):
-        print('1')
         messages = [x.to_dict() for x in self.get_messages(self.request.chat_id)]
-        print('2')
         for message in messages:
             message['is_my'] = False
             if message['user_id'] is not None and message['user_id'] == self.user_id:
                 message['is_my'] = True
-        print('3')
         messages = sorted(messages, key=lambda x: x['created_at'])
         self.sendMessage(Response(type=ErrorType.SUCCESS, detail='',
                                   event_type=self.request.event_type,
                                   messages=messages).to_json())
-        print('4')
 
     def send_file(self):
         self.send_message()
@@ -163,9 +163,7 @@ class ChatClient(WebSocket, ClientInterface):
             if not self.is_chat_exists(self.request.chat_id):
                 raise ChatNotExistsError('Chat not exists or user dont have permissions to write/read this chat')
             if self.user_id is None:
-                print('1')
                 is_auth_success = self.is_authenticated(self.request.token)
-                print('2')
                 if is_auth_success is None:
                     raise AuthorizationError('Token validation error')
                 self.user_id = is_auth_success
