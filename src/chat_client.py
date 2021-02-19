@@ -114,7 +114,7 @@ class ChatClient(WebSocket, ClientInterface):
         self.request = None
 
     def get_active_users(self, chat_id: str) -> List[str]:
-        return [x.user_id for x in self.get_clients if x.request.chat_id == chat_id]
+        return [x.user_id for x in self.get_clients if x.request and x.request.chat_id == chat_id]
 
     def send_message(self):
         message = self.request.message
@@ -139,8 +139,8 @@ class ChatClient(WebSocket, ClientInterface):
                                         messages=[message]).to_json())
             print('test3')
             if os.getenv('USE_NOTIFICATION'):
-                self.send_notification(self.request.chat_id, Message.from_dict(message),
-                                       self.get_active_users(self.request.chat_id))
+                self.send_notification(message['chat_id'], Message.from_dict(message),
+                                       self.get_active_users(message['chat_id']))
 
     def get_history(self):
         messages = [x.to_dict() for x in self.get_messages(self.request.chat_id)]
