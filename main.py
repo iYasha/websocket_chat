@@ -89,16 +89,22 @@ class Client(ChatClient):
         return cursor.fetchone()[0]
 
     def get_messages(self, chat_id: str) -> List[Message]:
-        cursor.execute(f'SELECT * FROM task_chatmessage WHERE chat_id = {chat_id}')
-        user_keys = [desc[0] for desc in cursor.description]
-        result = cursor.fetchall()
-        if result is None:
-            return None
-        messages = [Message.from_dict({x: res[idx] for idx, x in enumerate(user_keys)}) for res in result]
-        return messages
+        global connection, cursor
+        try:
+            cursor.execute(f'SELECT * FROM task_chatmessage WHERE chat_id = {chat_id}')
+            user_keys = [desc[0] for desc in cursor.description]
+            result = cursor.fetchall()
+            if result is None:
+                return None
+            messages = [Message.from_dict({x: res[idx] for idx, x in enumerate(user_keys)}) for res in result]
+            return messages
+        except Exception as e:
+            logger.error(e)
+            connection = get_connection()
+            cursor = connection.cursor()
 
     def is_chat_exists(self, chat_id: str) -> bool:
-        cursor.execute(f'SELECT * FROM task_task WHERE id = {chat_id}')
+        cursor.execute(f'SELECT * FROM task_chatroom WHERE id = {chat_id}')
         task = cursor.fetchone()
         if task is None:
             return False

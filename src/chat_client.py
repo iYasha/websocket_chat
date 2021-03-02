@@ -105,9 +105,6 @@ class ClientInterface:
 
 class ChatClient(WebSocket, ClientInterface):
     user_id: Optional[str] = None
-    """
-    @TODO Проверить что выполнены все контракты
-    """
 
     def __init__(self, server, sock, address):
         super().__init__(server, sock, address)
@@ -125,19 +122,15 @@ class ChatClient(WebSocket, ClientInterface):
         message['chat_id'] = self.request.chat_id
         message['user_id'] = self.user_id
         message['id'] = self.save_message(message)
-        print('test')
         for client in iter(filter(
                 lambda x: x.request is not None and x.request.chat_id == self.request.chat_id, self.get_clients
         )):
-            print('test1')
             message['is_my'] = False
             if client.user_id is not None and client.user_id == self.user_id:
                 message['is_my'] = True
-            print('test2')
             client.sendMessage(Response(type=ErrorType.SUCCESS, detail='Success',
                                         event_type=self.request.event_type,
                                         messages=[message]).to_json())
-            print('test3')
             if os.getenv('USE_NOTIFICATION'):
                 self.send_notification(message['chat_id'], Message.from_dict(message),
                                        self.get_active_users(message['chat_id']))
