@@ -33,6 +33,7 @@ class MessageType(Enum):
 class Message:
     type: MessageType = field(metadata=config(encoder=lambda x: x.value, decoder=lambda x: MessageType(x)))
     text: Optional[str] = None
+    views: List[int] = None
     created_at: Optional[int] = None
     file_url: Optional[str] = None
     username: Optional[str] = None

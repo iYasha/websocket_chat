@@ -98,6 +98,11 @@ class Client(ChatClient):
         self.add_views(msg_id, message.user_id)
         return cursor.fetchone()[0]
 
+    def get_message_views(self, message_id: int):
+        global cursor, connection
+        cursor.execute(f'SELECT user_id FROM task_chatmessage_views WHERE chatmessage_id = {message_id}')
+        return cursor.fetchone()
+
     def get_messages(self, chat_id: str) -> List[Message]:
         global connection, cursor
         try:
@@ -109,6 +114,12 @@ class Client(ChatClient):
             messages = [Message.from_dict({x: res[idx] for idx, x in enumerate(user_keys)}) for res in result]
             for message in messages:
                 self.add_views(message.id, message.user_id)
+                try:
+                    views = self.get_message_views(message.id)
+                    logger.error(str(views))
+                    message.views = views
+                except Exception:
+                    pass
             return messages
         except Exception as e:
             logger.error(e)
