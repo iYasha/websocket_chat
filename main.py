@@ -118,7 +118,8 @@ class Client(ChatClient):
                     views = self.get_message_views(message.id)
                     message.views = views
                 except Exception:
-                    pass
+                    cursor.execute("ROLLBACK")
+                    connection.commit()
             return messages
         except Exception as e:
             logger.error(e)
