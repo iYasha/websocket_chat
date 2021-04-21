@@ -116,7 +116,6 @@ class Client(ChatClient):
                 self.add_views(message.id, message.user_id)
                 try:
                     views = self.get_message_views(message.id)
-                    logger.error(str(views))
                     message.views = views
                 except Exception:
                     pass
