@@ -77,6 +77,14 @@ class Client(ChatClient):
             return user.id
         return None
 
+    def add_views(self, chat_id: int, user_id: int):
+        global connection, cursor
+        cursor.execute(f"""
+        INSERT INTO task_chatmessage_views (chatmessage_id, user_id) SELECT {chat_id}, {user_id} 
+        WHERE NOT EXISTS (select * from task_chatmessage_views where chatmessage_id = {chat_id} AND user_id = {user_id})
+        """)
+        connection.commit()
+
     def save_message(self, message: Message) -> Optional[str]:
         global connection, cursor
         if 'id' in message:
@@ -86,6 +94,8 @@ class Client(ChatClient):
         cursor.execute(f'INSERT INTO task_chatmessage({keys}) VALUES ({values})')
         connection.commit()
         cursor.execute('SELECT LASTVAL()')
+        msg_id = cursor.fetchone()[0]
+        self.add_views(msg_id, message.user_id)
         return cursor.fetchone()[0]
 
     def get_messages(self, chat_id: str) -> List[Message]:
@@ -97,6 +107,8 @@ class Client(ChatClient):
             if result is None:
                 return None
             messages = [Message.from_dict({x: res[idx] for idx, x in enumerate(user_keys)}) for res in result]
+            for message in messages:
+                self.add_views(message.id, message.user_id)
             return messages
         except Exception as e:
             logger.error(e)
