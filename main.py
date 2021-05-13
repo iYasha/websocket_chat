@@ -89,6 +89,8 @@ class Client(ChatClient):
         global connection, cursor
         if 'id' in message:
             message.pop('id')
+        if 'views' in message:
+            message.pop('views')
         keys = ', '.join(message.keys())
         values = ', '.join(["'" + str(x) + "'" for x in message.values()])
         cursor.execute(f'INSERT INTO task_chatmessage({keys}) VALUES ({values})')
@@ -117,10 +119,9 @@ class Client(ChatClient):
                     self.add_views(message.id, message.user_id)
                     views = self.get_message_views(message.id)
                     message.views = views
-                except Exception as e:
-                    logger.error(e)
-                    # cursor.execute("ROLLBACK")
-                    # connection.commit()
+                except Exception:
+                    cursor.execute("ROLLBACK")
+                    connection.commit()
             return messages
         except Exception as e:
             logger.error(e)
