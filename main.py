@@ -113,8 +113,8 @@ class Client(ChatClient):
                 return None
             messages = [Message.from_dict({x: res[idx] for idx, x in enumerate(user_keys)}) for res in result]
             for message in messages:
-                self.add_views(message.id, message.user_id)
                 try:
+                    self.add_views(message.id, message.user_id)
                     views = self.get_message_views(message.id)
                     message.views = views
                 except Exception:
